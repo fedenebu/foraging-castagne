@@ -1,0 +1,880 @@
+:root {
+  --surface-card: rgba(255, 253, 249, 0.96);
+  --surface-muted: #f5f2eb;
+  --surface-border: rgba(120, 53, 15, 0.16);
+
+  --text-main: #1c1917;
+  --text-secondary: #57534e;
+  --text-muted: #78716c;
+
+  --chestnut-dark: #78350f;
+  --chestnut-accent: #b45309;
+
+  --band-yellow: #facc15;
+  --band-yellow-border: #ca8a04;
+  --band-orange: #f97316;
+  --band-orange-border: #c2410c;
+  --band-red: #dc2626;
+  --band-red-border: #991b1b;
+
+  --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --shadow-card: 0 8px 24px rgba(28, 25, 23, 0.14);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  color: var(--text-main);
+  background: #e7e5e4;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-container {
+  position: relative;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.map-view {
+  width: 100%;
+  height: 100%;
+}
+
+/* ==========================================
+   TOP BAR: TITOLO E PAESINI
+   ========================================== */
+.top-overlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.top-header-card {
+  pointer-events: auto;
+  background: var(--surface-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 9px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  color: var(--chestnut-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.app-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.15;
+}
+
+.app-location-status {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--chestnut-accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.chip-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 80ms ease-out, background-color 120ms ease-out;
+}
+
+.chip-action.active {
+  background: var(--chestnut-dark);
+  color: #ffffff;
+  border-color: var(--chestnut-dark);
+}
+
+.chip-saved {
+  background: #fef3c7;
+  color: var(--chestnut-dark);
+  border-color: #f59e0b;
+}
+
+.chip-action:active {
+  transform: scale(0.96);
+}
+
+/* SCORRIMENTO ORIZZONTALE PAESINI */
+.villages-bar {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 2px 6px;
+  scrollbar-width: none;
+}
+
+.villages-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.village-pill {
+  height: 34px;
+  padding: 0 13px;
+  border-radius: 999px;
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.10);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 80ms ease-out, background-color 120ms ease-out;
+}
+
+.village-pill.active {
+  background: #ea580c;
+  color: #ffffff;
+  border-color: #c2410c;
+}
+
+.village-pill:active {
+  transform: scale(0.95);
+}
+
+/* ==========================================
+   COLONNA DESTRA: GPS + SEGNA POSTO DISCRETO
+   ========================================== */
+.right-floating-controls {
+  position: absolute;
+  right: 12px;
+  top: 112px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.fab-gps {
+  height: 42px;
+  padding: 0 13px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1d4ed8;
+  border: 2px solid #2563eb;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.22);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 80ms ease-out, background-color 120ms ease-out;
+}
+
+.fab-gps.tracking {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.fab-pin-save {
+  height: 34px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: rgba(255, 251, 235, 0.94);
+  color: var(--chestnut-dark);
+  border: 1.5px solid #d97706;
+  box-shadow: 0 4px 12px rgba(120, 53, 15, 0.16);
+  font-family: var(--font-sans);
+  font-size: 0.73rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: transform 80ms ease-out, background-color 120ms ease-out;
+}
+
+.fab-pin-save:hover {
+  background: #fef3c7;
+}
+
+.fab-gps:active,
+.fab-pin-save:active {
+  transform: scale(0.95);
+}
+
+/* TOAST DI CONFERMA */
+.toast-msg {
+  position: absolute;
+  top: 112px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1c1917;
+  color: #fef3c7;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+  z-index: 40;
+}
+
+.toast-msg[hidden] {
+  display: none !important;
+}
+
+/* ==========================================
+   CASSETTO POSTI SALVATI (SAVED DRAWER)
+   ========================================== */
+.saved-drawer {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  max-width: 580px;
+  max-height: 62dvh;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 2px solid #d97706;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.25);
+  padding: 14px 16px;
+  z-index: 35;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.saved-drawer[hidden] {
+  display: none !important;
+}
+
+.saved-list-body {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 44dvh;
+}
+
+.saved-item-card {
+  background: var(--surface-muted);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.saved-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.saved-item-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.saved-item-coords {
+  font-family: monospace;
+  font-size: 0.74rem;
+  color: var(--chestnut-accent);
+  font-weight: 600;
+}
+
+.saved-item-date {
+  font-size: 0.67rem;
+  color: var(--text-muted);
+}
+
+.saved-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.btn-mini {
+  height: 30px;
+  padding: 0 9px;
+  border-radius: 7px;
+  border: 1px solid var(--surface-border);
+  background: #ffffff;
+  color: var(--text-main);
+  font-size: 0.71rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-mini-del {
+  color: #dc2626;
+}
+
+.saved-drawer-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 4px;
+  border-top: 1px solid #e7e5e4;
+}
+
+.btn-secondary-small {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: #fef3c7;
+  color: var(--chestnut-dark);
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ==========================================
+   PANNELLO IN BASSO (BOTTOM SHEET)
+   ========================================== */
+.bottom-sheet {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  max-width: 580px;
+  margin: 0 auto;
+  background: var(--surface-card);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  z-index: 25;
+  overflow: hidden;
+  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.sheet-handle-bar {
+  width: 100%;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+
+.sheet-handle-pill {
+  width: 32px;
+  height: 4px;
+  border-radius: 999px;
+  background: #d6d3d1;
+}
+
+.sheet-summary-text {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.sheet-toggle-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--chestnut-accent);
+}
+
+.sheet-body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bottom-sheet.collapsed .sheet-body {
+  display: none;
+}
+
+/* LE 3 FASCE COLORATE (GIALLA / ARANCIONE / ROSSA) */
+.bands-legend {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+}
+
+.band-card {
+  background: var(--surface-muted);
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 7px 8px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  opacity: 0.45;
+  transition: opacity 120ms ease-out, transform 80ms ease-out, border-color 120ms ease-out;
+}
+
+.band-card.active {
+  opacity: 1;
+}
+
+.band-yellow.active {
+  background: #fefce8;
+  border-color: var(--band-yellow-border);
+}
+
+.band-orange.active {
+  background: #fff7ed;
+  border-color: var(--band-orange-border);
+}
+
+.band-red.active {
+  background: #fef2f2;
+  border-color: var(--band-red-border);
+}
+
+.band-top {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.band-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.swatch-yellow {
+  background: var(--band-yellow);
+  border: 1px solid #a16207;
+}
+
+.swatch-orange {
+  background: var(--band-orange);
+  border: 1px solid #9a3412;
+}
+
+.swatch-red {
+  background: var(--band-red);
+  border: 1px solid #7f1d1d;
+}
+
+.band-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.band-meters {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+.band-meaning {
+  font-size: 0.67rem;
+  color: var(--text-secondary);
+  line-height: 1.25;
+}
+
+/* SLIDER LONTANANZA */
+.control-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.control-label-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.control-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.control-value-pill {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #c2410c;
+  background: #ffedd5;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.thumb-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #facc15 0%, #f97316 55%, #dc2626 100%);
+  outline: none;
+  margin: 4px 0 2px;
+  cursor: pointer;
+}
+
+.thumb-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid #ea580c;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+.slider-Captions {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.67rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* BOTTONI SCELTA TERRENO (PENDENZA) */
+.steep-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.slope-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.slope-btn {
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--surface-border);
+  background: var(--surface-muted);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  transition: transform 80ms ease-out, background-color 120ms ease-out, border-color 120ms ease-out;
+}
+
+.slope-btn.active {
+  background: #fef3c7;
+  border-color: #d97706;
+}
+
+.slope-btn-title {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.slope-btn-sub {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+}
+
+/* ==========================================
+   SCHEDA POPUP QUANDO TOCCHI UN PUNTO (SPOT SHEET)
+   ========================================== */
+.spot-sheet {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  max-width: 580px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 2px solid var(--chestnut-accent);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
+  padding: 14px 16px;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.spot-sheet[hidden] {
+  display: none !important;
+}
+
+.spot-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.spot-badge-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.spot-color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--band-orange);
+}
+
+.btn-close-spot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #e7e5e4;
+  background: var(--surface-muted);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.spot-title-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.spot-village-title {
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.spot-coords-tag {
+  font-family: monospace;
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  background: var(--surface-muted);
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+.spot-advice {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.spot-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.spot-fact-box {
+  background: var(--surface-muted);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fact-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.fact-value {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.fact-sub {
+  font-size: 0.70rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spot-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-nav-parking {
+  flex: 1;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: #ea580c;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 0.79rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-save-spot-inline {
+  height: 40px;
+  padding: 0 11px;
+  border-radius: var(--radius-sm);
+  background: #fef3c7;
+  border: 1.5px solid #d97706;
+  color: var(--chestnut-dark);
+  font-family: var(--font-sans);
+  font-size: 0.77rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.btn-nav-point {
+  height: 40px;
+  padding: 0 11px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  border: 1px solid var(--surface-border);
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: 0.77rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* MARKER UTENTE GPS LIVE & PUNTINI SALVATI */
+.gps-user-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2563eb;
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.30);
+}
+
+.saved-spot-pin {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #f59e0b;
+  border: 2.5px solid #78350f;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .band-meters {
+    margin-left: 0;
+  }
+  .band-meaning {
+    font-size: 0.63rem;
+  }
+}

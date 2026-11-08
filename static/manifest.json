@@ -1,0 +1,9 @@
+{
+  "name": "Mappa Castagne — Campo dei Fiori",
+  "short_name": "Castagne",
+  "description": "Mappa strategica dei castagneti e dei sentieri sul Campo dei Fiori e Sacro Monte di Varese",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f2eb",
+  "theme_color": "#78350f"
+}

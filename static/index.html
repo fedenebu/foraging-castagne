@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#78350f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Castagne" />
+  <link rel="manifest" href="/static/manifest.json" />
+
+  <title>Mappa Castagne — Campo dei Fiori &amp; Varese</title>
+  <meta name="description" content="Mappa semplice per trovare le zone migliori per raccogliere castagne lontano dai sentieri battuti sul Campo dei Fiori e Sacro Monte di Varese." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="app-container">
+    <!-- MAPPA FULL SCREEN -->
+    <div id="map" class="map-view" aria-label="Mappa dei castagneti e dei sentieri"></div>
+
+    <!-- BARRA SUPERIORE: TITOLO + SCELTA PAESINO -->
+    <header class="top-overlay">
+      <div class="top-header-card">
+        <div class="app-brand">
+          <div class="brand-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3C7.2 3 4 7.2 4 12.2c0 4.3 3.4 7.8 8 8.8 4.6-1 8-4.5 8-8.8C20 7.2 16.8 3 12 3z" />
+              <path d="M7.5 15.5c2.5 1.5 6.5 1.5 9 0" />
+              <path d="M12 3v2.5" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="app-title">Mappa Castagne</h1>
+            <p class="app-location-status" id="currentVillageStatus">Campo dei Fiori &amp; Sacro Monte (VA)</p>
+          </div>
+        </div>
+
+        <!-- BOTTONI RAPIDI: POSTI SALVATI, SENTIERI, SATELLITE -->
+        <div class="top-quick-actions">
+          <button type="button" class="chip-action chip-saved" id="btnOpenSavedList" title="Vedi i tuoi posti salvati con le coordinate">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            <span id="savedCountBadge">0</span>
+          </button>
+
+          <button type="button" class="chip-action active" id="btnToggleTrails" title="Mostra o nascondi i sentieri">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M4 19l5-5m4-4l7-7M9 5l10 10" />
+            </svg>
+            <span>Sentieri</span>
+          </button>
+
+          <button type="button" class="chip-action" id="btnToggleSat" title="Passa alla foto aerea satellitare">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 0 1 0 18" />
+            </svg>
+            <span>Satellite</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- SCORRIMENTO ORIZZONTALE PAESINI -->
+      <nav class="villages-bar" id="villagesBar" aria-label="Scegli il paesino">
+        <button type="button" class="village-pill active" data-village="all">Tutta la Mappa</button>
+        <!-- I paesini vengono inseriti da app.js -->
+      </nav>
+    </header>
+
+    <!-- COLONNA PULSANTI FLOTTANTI A DESTRA: GPS + SEGNA POSTO DISCRETO -->
+    <div class="right-floating-controls">
+      <button type="button" class="fab-gps" id="btnMyLocation" aria-label="Mostra la mia posizione GPS mentre cammino">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="12" cy="12" r="4" />
+          <circle cx="12" cy="12" r="9" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+        </svg>
+        <span id="gpsBtnText">Dove sono</span>
+      </button>
+
+      <!-- Pulsantino discreto per salvare subito il punto in cui hai trovato tante castagne -->
+      <button type="button" class="fab-pin-save" id="btnQuickSaveSpot" title="Salva le coordinate di questo posto (dove ti trovi o centro mappa)">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z" />
+          <line x1="12" y1="8" x2="12" y2="14" />
+          <line x1="9" y1="11" x2="15" y2="11" />
+        </svg>
+        <span>Segna posto</span>
+      </button>
+    </div>
+
+    <!-- TOAST DI CONFERMA RAPIDA -->
+    <div class="toast-msg" id="toastMsg" hidden>Posto salvato!</div>
+
+    <!-- CASSETTO DISCRETO: ELENCO DEI TUOI POSTI SALVATI CON COORDINATE -->
+    <section class="saved-drawer" id="savedDrawer" hidden aria-label="I tuoi posti delle castagne salvati">
+      <div class="spot-sheet-header">
+        <div class="spot-badge-wrap">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="#d97706" stroke="#78350f" stroke-width="1.5">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+          <span>I Miei Posti delle Castagne</span>
+        </div>
+        <button type="button" class="btn-close-spot" id="btnCloseSavedDrawer" aria-label="Chiudi elenco posti salvati">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="saved-list-body" id="savedListContainer">
+        <!-- Popolato da app.js -->
+      </div>
+
+      <div class="saved-drawer-footer" id="savedDrawerFooter">
+        <button type="button" class="btn-secondary-small" id="btnCopyAllSaved">Copia tutte le coordinate</button>
+      </div>
+    </section>
+
+    <!-- SCHEDA POPUP QUANDO TOCCHI UN PUNTO SULLA MAPPA -->
+    <section class="spot-sheet" id="spotSheet" hidden aria-live="polite">
+      <div class="spot-sheet-header">
+        <div class="spot-badge-wrap">
+          <span class="spot-color-dot" id="spotColorDot"></span>
+          <span class="spot-band-title" id="spotBandTitle">Zona Arancione — Strategica</span>
+        </div>
+        <button type="button" class="btn-close-spot" id="btnCloseSpot" aria-label="Chiudi scheda punto">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="spot-title-line">
+        <h2 class="spot-village-title" id="spotVillageTitle">Vicino a Brinzio</h2>
+        <span class="spot-coords-tag" id="spotCoordsText">45.8850, 8.7780</span>
+      </div>
+      <p class="spot-advice" id="spotAdvice"></p>
+
+      <div class="spot-facts">
+        <div class="spot-fact-box">
+          <span class="fact-label">Distanza dal sentiero</span>
+          <span class="fact-value" id="spotDistValue">68 metri</span>
+          <span class="fact-sub" id="spotTrailName">Sentiero CAI 310</span>
+        </div>
+        <div class="spot-fact-box">
+          <span class="fact-label">Come è il terreno</span>
+          <span class="fact-value" id="spotSlopeValue">Pendio dolce (14%)</span>
+          <span class="fact-sub" id="spotElevValue">Quota 610 m</span>
+        </div>
+      </div>
+
+      <div class="spot-actions">
+        <a href="#" target="_blank" rel="noopener" class="btn-nav-parking" id="linkParkingMaps">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2">
+            <rect x="3" y="3" width="18" height="18" rx="4" />
+            <path d="M9 17V7h4a3 3 0 0 1 0 6H9" />
+          </svg>
+          <span id="parkingBtnText">Parcheggio vicino</span>
+        </a>
+
+        <button type="button" class="btn-save-spot-inline" id="btnSaveFromSheet" title="Salva questo punto nei tuoi posti delle castagne">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+          <span>Salva posto</span>
+        </button>
+
+        <a href="#" target="_blank" rel="noopener" class="btn-nav-point" id="linkPointMaps" title="Apri questo punto esatto su Google Maps">
+          <span>Maps</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- PANNELLO IN BASSO: LEGENDA COLORI + SLIDER LONTANANZA + PENDENZA -->
+    <section class="bottom-sheet" id="bottomSheet" aria-label="Controlli fasce di lontananza e terreno">
+      <button type="button" class="sheet-handle-bar" id="btnToggleSheet" aria-expanded="true">
+        <span class="sheet-handle-pill"></span>
+        <span class="sheet-summary-text" id="sheetSummaryText">Fasce Castagneto · Da 45m dal sentiero</span>
+        <span class="sheet-toggle-label" id="sheetToggleLabel">Riduci</span>
+      </button>
+
+      <div class="sheet-body" id="sheetBody">
+        <!-- LE 3 FASCE DI COLORE (Toccabili per accendere/spegnere) -->
+        <div class="bands-legend" role="group" aria-label="Legenda fasce di distanza dal sentiero">
+          <button type="button" class="band-card band-yellow active" data-band="yellow">
+            <div class="band-top">
+              <span class="band-swatch swatch-yellow"></span>
+              <span class="band-name">Gialla</span>
+              <span class="band-meters" id="lblMetersYellow">0–45 m</span>
+            </div>
+            <span class="band-meaning">Vicino al sentiero (già battuta)</span>
+          </button>
+
+          <button type="button" class="band-card band-orange active" data-band="orange">
+            <div class="band-top">
+              <span class="band-swatch swatch-orange"></span>
+              <span class="band-name">Arancione</span>
+              <span class="band-meters" id="lblMetersOrange">45–110 m</span>
+            </div>
+            <span class="band-meaning">Zona Strategica (consigliata)</span>
+          </button>
+
+          <button type="button" class="band-card band-red active" data-band="red">
+            <div class="band-top">
+              <span class="band-swatch swatch-red"></span>
+              <span class="band-name">Rossa</span>
+              <span class="band-meters" id="lblMetersRed">110–220 m</span>
+            </div>
+            <span class="band-meaning">Bosco Profondo (meno battuta)</span>
+          </button>
+        </div>
+
+        <!-- CONTROLLO 1: SLIDER LONTANANZA DAI SENTIERI -->
+        <div class="control-row">
+          <div class="control-label-line">
+            <label for="sliderNearDist" class="control-title">Quando inizia la zona buona (Arancione)?</label>
+            <span class="control-value-pill" id="valNearDist">Dopo 45 metri dal sentiero</span>
+          </div>
+          <input
+            type="range"
+            id="sliderNearDist"
+            min="25"
+            max="85"
+            step="10"
+            value="45"
+            class="thumb-slider"
+          />
+          <div class="slider-Captions">
+            <span>25 m (Subito fuori sentiero)</span>
+            <span>45 m (Ideale)</span>
+            <span>85 m (Molto dentro)</span>
+          </div>
+        </div>
+
+        <!-- CONTROLLO 2: TERRENO / PENDENZA MASSIMA -->
+        <div class="control-row">
+          <div class="control-label-line">
+            <span class="control-title">Che terreno vuoi fare a piedi?</span>
+            <label class="steep-toggle-label" for="chkShowSteep">
+              <input type="checkbox" id="chkShowSteep" />
+              <span>Mostra dirupi ripidi</span>
+            </label>
+          </div>
+          <div class="slope-buttons" role="radiogroup" aria-label="Pendenza massima terreno">
+            <button type="button" class="slope-btn" data-slope="22" role="radio" aria-checked="false">
+              <span class="slope-btn-title">Solo Pianori</span>
+              <span class="slope-btn-sub">Molto comodo (&le;22%)</span>
+            </button>
+            <button type="button" class="slope-btn active" data-slope="32" role="radio" aria-checked="true">
+              <span class="slope-btn-title">Normale</span>
+              <span class="slope-btn-sub">Camminabile (&le;32%)</span>
+            </button>
+            <button type="button" class="slope-btn" data-slope="42" role="radio" aria-checked="false">
+              <span class="slope-btn-title">Anche Ripido</span>
+              <span class="slope-btn-sub">Per esperti (&le;42%)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
