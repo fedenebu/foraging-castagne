@@ -7,3 +7,4 @@ ENV/
 .env
 .DS_Store
 data/raw_osm_campodeifiori.json
+.context/
